@@ -1,3 +1,7 @@
 swiss/
 dataset/
+test/
+temp/
 __pycache__/
+
+*.xml
