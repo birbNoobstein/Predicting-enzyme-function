@@ -47,25 +47,39 @@ def extract_enzymes(ipt):
 
 
 def cluster(name):
-    sp.run(['cd-hit', '-i', name+'.fasta', '-o', name+'fasta', '-c', '0.4',  '-n', '2', '-d', '0'])
+    sp.run(['/mnt/e/DS/cdhit/cd-hit', '-i', name+'.fasta', '-o', name+'.fasta', '-c', '0.4',  '-n', '2', '-d', '0', '-T', '6'])
     
     
 def split_traintest(names):
+    train = []
+    test = []
     sequences = []
     for name in names:
-        sequences = sequences + list(SeqIO.parse(name+'fasta', 'fasta'))
+        sequences = sequences + list(SeqIO.parse(name, 'fasta'))
+        
     
-    for seq in sequences:
+    for e, seq in enumerate(sequences):
         one_hot_encode(seq)
         SeqIO.write(seq, './dataset/fasta/'+seq.id+'.fasta', 'fasta')
         psi = NcbipsiblastCommandline(cmd='psiblast', 
                                       query='./dataset/fasta/'+seq.id+'.fasta', 
-                                      db='./swiss/swiss.fasta', 
+                                      db='./swiss/uniprot_sprot.fasta', 
                                       evalue=0.002, 
                                       num_iterations='3', 
                                       out_pssm='./dataset/pssm/'+seq.id+'.asn',
                                       num_threads=3)
         psi()
+        x = np.random.uniform(low=0.0, high=1.0)
+        if x <= 0.3:
+            test.append(seq.id)
+        else:
+            train.append(seq.id)
+        if e % 1000 == 0:
+            print(e, 'done')
+        
+    pd.DataFrame(test).to_csv('dataset/testID.csv', index=False)
+    pd.DataFrame(train).to_csv('dataset/trainID.csv', index=False)
+    
     
     
     

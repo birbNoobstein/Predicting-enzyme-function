@@ -11,23 +11,13 @@ from data_preprocess_helpers import extract_enzymes, cluster, one_hot_encode, sp
 from constants import keys
 
 
-def ohc():
-    for key in keys:
-        name = 'temp/by_class/class'+key+'_reduced.fasta'
-        one_hot_encode(name)
 
-def reduce(names):
-    for name in names:
-        cluster(name)
-        
-
-    
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', 
                         type=str, 
-                        default='data/uniprot_sprot.xml', 
+                        default='uniprot_sprot.xml', 
                         help='uniprot XML file to reduce')
     parser.add_argument('--output', 
                         type=str, 
@@ -40,18 +30,16 @@ def main():
     opt = args.output
     
     t1 = time.time()
-    extract_enzymes(ipt)
-    t2 = time.time()
-    print('Extraction took', str(round((t2-t1)/60, 2)) + 'min')
+    keys = ['3', '4', '5', '6', '7']
     names = []
     for key in keys:
-        names.append('./temp/by_class/class'+key)
+        names.append('temp/by_class/class'+key+'.fasta')
         
-    reduce(names)
+    
     split_traintest(names)
     
-    t3 = time.time()
-    print('Aligning took', str(round((t3-t2)/60, 2)) + 'min')
+    t2 = time.time()
+    print('Aligning took', str(round((t2-t1)/60, 2)) + 'min')
     
     
     
