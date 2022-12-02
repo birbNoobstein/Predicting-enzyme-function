@@ -5,41 +5,65 @@ Created on Mon Nov 21 11:12:40 2022
 @author: Ana
 """
 import time
-import argparse
+import numpy as np
 
-from data_preprocess_helpers import extract_enzymes, cluster, one_hot_encode, split_traintest
-from constants import keys
+from Bio import SeqIO
+from Bio.Blast.Applications import NcbipsiblastCommandline
 
+from constants import keys, aa
 
+""" 
+    Using PSI-BLAST returns PSSM matrices (writes them in files), also writes
+    fasta and one-hot encoded sequence
+"""
+
+def one_hot_encode(seq):
+    arr = np.zeros([len(seq.seq), len(aa)])
+    for s in range(len(seq.seq)):
+        if seq.seq[s] in aa:
+            arr[s, aa.index(seq.seq[s])] = 1
+    np.savetxt('./dataset/binary/'+seq.id+'.txt', arr, fmt='%d')
+    
+
+def call_psiblast(names):
+    # CALL PSIBLAST and WRITE ALL 3 files
+    train = []
+    test = []
+    sequences = []
+    for name in names:
+        sequences = sequences + list(SeqIO.parse(name, 'fasta'))
+        
+    
+    for e, seq in enumerate(sequences):
+        one_hot_encode(seq)
+        SeqIO.write(seq, './dataset/fasta/'+seq.id+'.fasta', 'fasta')
+        psi = NcbipsiblastCommandline(cmd='psiblast', 
+                                      query='./dataset/fasta/'+seq.id+'.fasta', 
+                                      db='./swiss/uniprot_sprot.fasta', 
+                                      evalue=0.002, 
+                                      num_iterations='3', 
+                                      out_pssm='./dataset/pssm/'+seq.id+'.asn',
+                                      num_threads=3)
+        psi()
+        x = np.random.uniform(low=0.0, high=1.0)
+        if x <= 0.3:
+            test.append(seq.id)
+        else:
+            train.append(seq.id)
+        if e % 1000 == 0:
+            print(e, 'done')
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--input', 
-                        type=str, 
-                        default='uniprot_sprot.xml', 
-                        help='uniprot XML file to reduce')
-    parser.add_argument('--output', 
-                        type=str, 
-                        default='data/enzymes.xml',
-                        help='Where to output reducted file')
-
-    args = parser.parse_args()
-    
-    ipt = args.input
-    opt = args.output
-    
     t1 = time.time()
-    keys = ['3', '4', '5', '6', '7']
     names = []
     for key in keys:
         names.append('temp/by_class/class'+key+'.fasta')
         
-    
-    split_traintest(names)
+    call_psiblast(names)
     
     t2 = time.time()
-    print('Aligning took', str(round((t2-t1)/60, 2)) + 'min')
+    print('Psiblast took', str(round((t2-t1)/60, 2)) + 'min')
     
     
     
