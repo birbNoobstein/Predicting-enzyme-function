@@ -4,9 +4,12 @@ Created on Tue Nov 29 19:21:41 2022
 
 @author: Ana
 """
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
-from constants import pssm_idx
+
+from Bio.Blast.Applications import NcbiblastformatterCommandline
+
+from constants import pssm_idx, path_to_pssmR, path_to_pssmP, path_ID, path_to_pssmA, path_preID
 
 """ 
     PARSING PSSM MATRICES FROM PSI-BLAST OUTPUT
@@ -18,7 +21,7 @@ def get_IDs(path):
         for line in handle.readlines():
             IDs.append(line.split('.')[0].strip())
 
-    np.savetxt('E:/DS/Predicting-enzyme-function/dataset/IDs.txt', 
+    np.savetxt(path_ID, 
                np.array(IDs),
                fmt='%s')
     return IDs
@@ -31,7 +34,7 @@ def clean(x):
 def get_pssm(ID, clean):
     pssm = []
     pause = True
-    with open('E:/DS/Predicting-enzyme-function/dataset/pssm/'+ID+'.asn') as handle:
+    with open('path_to_pssmR'+ID+'.asn') as handle:
         for line in handle.readlines():
             if not pause:
                 if line.strip() == '},':
@@ -42,15 +45,18 @@ def get_pssm(ID, clean):
                 pause = False
     pssm = clean(np.array(pssm))
     pssm = pssm.reshape(int(pssm.shape[0]/28), 28)[:,pssm_idx]
-    np.savetxt('E:/DS/Predicting-enzyme-function/dataset/parsed_pssm/'+ID+'.txt', pssm, fmt='%.2f')
+    np.savetxt('path_to_pssmP'+ID+'.txt', pssm, fmt='%.2f')
 
+def pssm_to_ascii(ID):
+    convert = NcbiblastformatterCommandline(archive=ID, outfmt=5, out="/mnt/e/DS/Predicting-enzyme-function/dataset/test/example.xml")
+    convert()
 
 
 def main():
-    IDs = get_IDs('E:/DS/Predicting-enzyme-function/ids.txt')
+    IDs = get_IDs(path_preID)
     cln = np.vectorize(clean)
     for ID in IDs:
-        get_pssm(ID, cln)
+       get_pssm(ID, cln)
 
     
 if __name__ == '__main__':
