@@ -10,7 +10,7 @@ import numpy as np
 from Bio import SeqIO
 from Bio.Blast.Applications import NcbipsiblastCommandline
 
-from constants import keys, aa, path_to_fasta, path_to_bin, path_to_pssmA, path_to_pssmR
+from constants import keys, aa, path_to_fasta, path_to_bin, path_to_pssmR
 
 """ 
     Using PSI-BLAST returns PSSM matrices (writes them in files), also writes
@@ -43,7 +43,6 @@ def call_psiblast(names):
                                       evalue=0.002, 
                                       num_iterations='3', 
                                       out_pssm=path_to_pssmR+seq.id+'.asn',
-                                      out_ascii_pssm=path_to_pssmA+seq.id+'.pssm',
                                       num_threads=3)
         psi()
         x = np.random.uniform(low=0.0, high=1.0)
@@ -58,6 +57,7 @@ def call_psiblast(names):
 def main():
     t1 = time.time()
     names = []
+    keys = ['6', '7']
     for key in keys:
         names.append('temp/by_class/class'+key+'.fasta')
         
