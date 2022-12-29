@@ -21,7 +21,7 @@ path_to_pssmP = '/media/ana/New Volume/DS/Predicting-enzyme-function/dataset/pss
 
 path_truths = '/media/ana/New Volume/DS/Predicting-enzyme-function/dataset/IdEc.csv'
 
-path_ID = '/media/ana/New Volume/DS/Predicting-enzyme-function/dataset/id_names.txt'
+path_ID = '/media/ana/New Volume/DS/Predicting-enzyme-function/data_ID.txt'
 path_IDbin = '/media/ana/New Volume/DS/Predicting-enzyme-function/dataset/ID_bin.txt'
 path_IDpssm = '/media/ana/New Volume/DS/Predicting-enzyme-function/dataset/ID_pssm.txt'
 
